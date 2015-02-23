@@ -32,14 +32,21 @@ router.get('/new', function(req, res, next) {
     if(err) {
       console.error(err.stack);
       res.send("Failed to connect");
+      conn.end();
       return;
     }
     console.log('connected as id ' + conn.threadId);
-    res.send("Connected");
+    conn.query("INSERT INTO user values (test, test)", function (err, result) {
+      if(err) {
+        console.error("Failed to insert user");
+      }
+      console.log(result);
+    });
+    conn.end();
   });
 
   console.log("Hey bb");
-  conn.end()
+
 });
 
 module.exports = router;
