@@ -18,22 +18,24 @@ router.get('/all', function(req, res, next) {
 
 /* POST create user */
 router.get('/new', function(req, res, next) {
-  res.send("hello");
   var conn = mysql.createConnection({
     host    : "localhost",
     user    : "root",
     password: "root",
     port    : 3306,
-    database: "ops_db"
-
+    database: "picture_this",
+    connectTimeout : 30000
   });
 
+  //Open connection to database
   conn.connect(function(err) {
     if(err) {
-      console.error("CONNECTION IS FAILING:" + err.stack);
+      console.error(err.stack);
+      res.send("Failed to connect");
       return;
     }
     console.log('connected as id ' + connection.threadId);
+    res.send("Connected");
   });
 
   console.log("Hey bb");
