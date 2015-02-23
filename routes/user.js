@@ -34,7 +34,7 @@ router.get('/new', function(req, res, next) {
       res.send("Failed to connect");
       return;
     }
-    console.log('connected as id ' + connection.threadId);
+    console.log('connected as id ' + conn.threadId);
     res.send("Connected");
   });
 
