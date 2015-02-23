@@ -19,7 +19,7 @@ router.get('/all', function(req, res, next) {
 /* POST create user */
 router.get('/new', function(req, res, next) {
   var conn = mysql.createConnection({
-    host    : "localhost",
+    host    : "ec2-52-1-159-248.compute-1.amazonaws.com",
     user    : "root",
     password: "root",
     port    : 3306,
