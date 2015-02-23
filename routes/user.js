@@ -36,7 +36,7 @@ router.get('/new', function(req, res, next) {
       return;
     }
     console.log('connected as id ' + conn.threadId);
-    conn.query("INSERT INTO user values (test, test)", function (err, result) {
+    conn.query("INSERT INTO user VALUES ('test', 'test')", function (err, result) {
       if(err) {
         console.error("********Failed to insert user**********");
         console.error(err);
