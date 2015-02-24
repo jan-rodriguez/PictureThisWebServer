@@ -13,33 +13,13 @@ var conn_params = {
 /* POST home page. */
 router.post('/new', function(req, res, next) {
 
-  //console.log("------BODY------");
-  //console.log(req.body);
-  console.log("------headers------");
-  console.log(req.headers);
-  console.log("-------files--------");
-  console.log(req.files);
-
   var challenger_id = req.headers.challenger_id;
   var challenged_id = req.headers.challenged_id;
   var latitude = req.headers.latitude;
   var longitude = req.headers.longitude;
-  var pic_path = "i_hate_this.png";
-  if(Object.keys(req.files).length !== 0){
-    pic_path = req.files.fileUpload.path;
-  }else{
+  var pic_path = req.files.fileUpload.path;
 
-    var file = fs.createWriteStream("public/images/fml.png");
-    for(data in req.body){
-      if(req.body.hasOwnProperty(data)) {
-        file.write(data);
-        console.log(data);
-      }
-    }
-    file.end();
-  }
-
-
+  // console.log(req);
 
   if(!challenger_id || !challenged_id || !latitude || !longitude) {
     res.json({error: "Must specify challenger_id, challenged_id, latitude, and longitude."});
