@@ -17,12 +17,19 @@ router.post('/new', function(req, res, next) {
   console.log(req.body);
   console.log("------headers------");
   console.log(req.headers);
+  console.log("-------files--------");
+  console.log(req.files);
 
   var challenger_id = req.headers.challenger_id;
   var challenged_id = req.headers.challenged_id;
   var latitude = req.headers.latitude;
   var longitude = req.headers.longitude;
-  var pic_path = req.files.fileUpload.path;
+  var pic_path;
+  if(req.files){
+    pic_path = req.files.fileUpload.path;
+  }
+
+
 
   if(!challenger_id || !challenged_id || !latitude || !longitude) {
     res.json({error: "Must specify challenger_id, challenged_id, latitude, and longitude."});
