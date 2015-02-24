@@ -24,17 +24,11 @@ router.post('/new', function(req, res, next) {
   var challenged_id = req.headers.challenged_id;
   var latitude = req.headers.latitude;
   var longitude = req.headers.longitude;
-  var pic_path;
+  var pic_path = "i_hate_this.png";
   if(Object.keys(req.files).length !== 0){
     pic_path = req.files.fileUpload.path;
   }else{
-    //var base64Data = req.body.replace(/^data:image\/png;base64,/, "");
-
-    console.log(req.body);
-
-    //fs.writeFile("out.png", base64Data, 'base64', function(err) {
-    //  console.log(err);
-    //});
+    req.pipe(fs.createWriteStream("public/images/i_hate_this.png"));
   }
 
 
@@ -49,7 +43,7 @@ router.post('/new', function(req, res, next) {
   challenged_id = mysql.escape(challenged_id);
   latitude = mysql.escape(latitude);
   longitude = mysql.escape(longitude);
-  pic_path = mysql.escape("fuck_you_node.jpg");
+  pic_path = mysql.escape(pic_path.replace("public/", ""));
 
   var conn = mysql.createConnection(conn_params);
 
