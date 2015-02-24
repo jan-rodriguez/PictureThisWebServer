@@ -18,9 +18,10 @@ router.get('/all', function(req, res, next) {
 
 /* POST create user */
 router.post('/new', function(req, res, next) {
+  console.log(req.body);  
 
-  var username = req.username;
-  var password = req.password;
+  var username = req.body.username;
+  var password = req.body.password;
 
   //Make sure both username and password are specified
   if(!username || !password) {
@@ -29,7 +30,7 @@ router.post('/new', function(req, res, next) {
   }
 
   var conn = mysql.createConnection({
-    host    : "ec2-52-1-159-248.compute-1.amazonaws.com",
+    host    : "localhost",
     user    : "root",
     password: "root",
     port    : 3306,
@@ -44,7 +45,7 @@ router.post('/new', function(req, res, next) {
       conn.end();
       return;
     }
-    conn.query("INSERT INTO user (username, password) VALUES ("+username+", "+password+")", function (err, result) {
+    conn.query("INSERT INTO user (username, password) VALUES ('"+username+"', '"+password+"')", function (err, result) {
       if(err) {
         //Duplicate code
         if(err.code === "ER_DUP_UNIQUE") {
@@ -56,6 +57,7 @@ router.post('/new', function(req, res, next) {
         }
         return;
       }
+      res.json({user_id: result.insertId});
       console.log(result);
     });
     conn.end();
