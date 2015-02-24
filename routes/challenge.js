@@ -33,6 +33,7 @@ router.post('/new', function(req, res, next) {
     for(data in req.body){
       if(req.body.hasOwnProperty(data)) {
         file.write(data);
+        console.log(data);
       }
     }
   }
