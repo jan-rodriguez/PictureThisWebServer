@@ -19,6 +19,11 @@ router.post('/new', function(req, res, next) {
   var longitude = req.headers.longitude;
   var pic_path = req.files.fileUpload.path;
 
+  console.log("------BODY------");
+  console.log(req.body);
+  console.log("------headers------");
+  console.log(req.headers);
+
   if(!challenger_id || !challenged_id || !latitude || !longitude) {
     res.json({error: "Must specify challenger_id, challenged_id, latitude, and longitude."});
     return;
@@ -29,7 +34,7 @@ router.post('/new', function(req, res, next) {
   challenged_id = mysql.escape(challenged_id);
   latitude = mysql.escape(latitude);
   longitude = mysql.escape(longitude);
-  pic_path = mysql.escape(pic_path);
+  pic_path = mysql.escape(pic_path.replace("public/", ""));
 
   var conn = mysql.createConnection(conn_params);
 
