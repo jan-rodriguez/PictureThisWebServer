@@ -88,6 +88,11 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
 /* GET all users */
 router.get('/all', function(req, res, next) {
 
+  console.log("------BODY------");
+  console.log(req.body);
+  console.log("------headers------");
+  console.log(req.headers);
+
   var conn = mysql.createConnection(conn_params);
 
   conn.connect(function(err) {
