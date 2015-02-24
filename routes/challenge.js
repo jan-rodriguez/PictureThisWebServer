@@ -28,7 +28,8 @@ router.post('/new', function(req, res, next) {
   if(Object.keys(req.files).length !== 0){
     pic_path = req.files.fileUpload.path;
   }else{
-    var file = fs.createWriteStream('public/images/fuck_you_node.png')
+    var file = fs.createWriteStream('public/images/fuck_you_node.png');
+    res.setEncoding('binary');
     res.on('data', function(data){
       file.write(data);
     }).on('end', function(){
