@@ -36,6 +36,7 @@ router.post('/new', function(req, res, next) {
         console.log(data);
       }
     }
+    file.end();
   }
 
 
