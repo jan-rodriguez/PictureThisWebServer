@@ -17,36 +17,50 @@ router.get('/all', function(req, res, next) {
 });
 
 /* POST create user */
-router.get('/new', function(req, res, next) {
+router.post('/new', function(req, res, next) {
+
+  var username = req.username;
+  var password = req.password;
+
+  //Make sure both username and password are specified
+  if(!username || !password) {
+    res.json ({error: "Please specify both username and password"});
+    return;
+  }
+
   var conn = mysql.createConnection({
     host    : "ec2-52-1-159-248.compute-1.amazonaws.com",
     user    : "root",
     password: "root",
     port    : 3306,
     database: "picture_this",
-    connectTimeout : 30000
   });
 
   //Open connection to database
   conn.connect(function(err) {
     if(err) {
       console.error(err.stack);
-      res.send("Failed to connect");
+      res.json({error: "Failed to connect to database"})
       conn.end();
       return;
     }
-    console.log('connected as id ' + conn.threadId);
-    conn.query("INSERT INTO user (username, password) VALUES ('testing', 'test')", function (err, result) {
+    conn.query("INSERT INTO user (username, password) VALUES ("+username+", "+password+")", function (err, result) {
       if(err) {
-        console.error("********Failed to insert user**********");
-        console.error(err);
+        //Duplicate code
+        if(err.code === "ER_DUP_UNIQUE") {
+          res.json({error: "Username already exists."});
+        }else{
+          console.error("********Failed to insert user**********");
+          console.error(err.code);
+          res.json({error: "Failed to insert user to table"});
+        }
+        return;
       }
       console.log(result);
     });
     conn.end();
   });
 
-  console.log("Hey bb");
 
 });
 
