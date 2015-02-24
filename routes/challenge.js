@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var mysql = require('mysql');
 var fs = require('fs');
+var formidable = require('formidable');
 var conn_params = {
     host    : "ec2-52-1-159-248.compute-1.amazonaws.com",
     user    : "root",
@@ -28,8 +29,11 @@ router.post('/new', function(req, res, next) {
   if(Object.keys(req.files).length !== 0){
     pic_path = req.files.fileUpload.path;
   }else{
-    var file = fs.createWriteStream('public/images/fuck_you_node.png');
-    file.pipe(req);
+    var form = new formidable.IncomingForm();
+
+    form.parse(req, function(err, fields, files) {
+      console.log({fields: fields, files: files});
+    });
   }
 
 
