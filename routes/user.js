@@ -18,7 +18,6 @@ router.get('/all', function(req, res, next) {
 
 /* POST create user */
 router.post('/new', function(req, res, next) {
-  console.log(req.body);
 
   var username = req.body.username;
   var password = req.body.password;
@@ -28,6 +27,10 @@ router.post('/new', function(req, res, next) {
     res.json ({error: "Please specify both username and password"});
     return;
   }
+
+  //SQL INJECTION SHALL NOT PASS!!!
+  var username = conn.escape(username);
+  var password = conn.escape(password);
 
   var conn = mysql.createConnection({
     host    : "ec2-52-1-159-248.compute-1.amazonaws.com",
@@ -48,7 +51,7 @@ router.post('/new', function(req, res, next) {
     conn.query("INSERT INTO user (username, password) VALUES ('"+username+"', '"+password+"')", function (err, result) {
       if(err) {
         //Duplicate code
-        if(err.code === "ER_DUP_UNIQUE") {
+        if(err.code === "ER_DUP_ENTRY") {
           res.json({error: "Username already exists."});
         }else{
           console.error("********Failed to insert user**********");
