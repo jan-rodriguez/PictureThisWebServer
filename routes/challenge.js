@@ -28,7 +28,13 @@ router.post('/new', function(req, res, next) {
   if(Object.keys(req.files).length !== 0){
     pic_path = req.files.fileUpload.path;
   }else{
-    req.pipe(fs.createWriteStream("public/images/i_hate_this.png"));
+
+    var file = fs.createWriteStream("public/images/fml.png");
+    for(data in req.body){
+      if(req.body.hasOwnProperty(data)) {
+        file.write(data);
+      }
+    }
   }
 
 
