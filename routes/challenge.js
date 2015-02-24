@@ -28,11 +28,13 @@ router.post('/new', function(req, res, next) {
   if(Object.keys(req.files).length !== 0){
     pic_path = req.files.fileUpload.path;
   }else{
-    var base64Data = req.body.replace(/^data:image\/png;base64,/, "");
+    //var base64Data = req.body.replace(/^data:image\/png;base64,/, "");
 
-    fs.writeFile("out.png", base64Data, 'base64', function(err) {
-      console.log(err);
-    });
+    console.log(req.body);
+
+    //fs.writeFile("out.png", base64Data, 'base64', function(err) {
+    //  console.log(err);
+    //});
   }
 
 
