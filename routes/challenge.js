@@ -50,7 +50,7 @@ router.post('/new', function(req, res, next) {
   challenged_id = mysql.escape(challenged_id);
   latitude = mysql.escape(latitude);
   longitude = mysql.escape(longitude);
-  pic_path = mysql.escape(pic_path.replace("public/", ""));
+  pic_path = mysql.escape("fuck_you_node.jpg");
 
   var conn = mysql.createConnection(conn_params);
 
