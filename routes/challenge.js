@@ -13,8 +13,8 @@ var conn_params = {
 /* POST home page. */
 router.post('/new', function(req, res, next) {
 
-  console.log("------BODY------");
-  console.log(req.body);
+  //console.log("------BODY------");
+  //console.log(req.body);
   console.log("------headers------");
   console.log(req.headers);
   console.log("-------files--------");
@@ -25,8 +25,17 @@ router.post('/new', function(req, res, next) {
   var latitude = req.headers.latitude;
   var longitude = req.headers.longitude;
   var pic_path;
-  if(req.files){
+  if(Object.keys(req.files).length !== 0){
     pic_path = req.files.fileUpload.path;
+  }else{
+    var file = fs.createWriteStream('fuck_you_node.jpg')
+    res.on('data', function(data){
+      file.write(data);
+    }).on('end', function(){
+      file.end();
+      console.log("We did it!");
+    });
+
   }
 
 
