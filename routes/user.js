@@ -29,8 +29,8 @@ router.post('/new', function(req, res, next) {
   }
 
   //SQL INJECTION SHALL NOT PASS!!!
-  var username = conn.escape(username);
-  var password = conn.escape(password);
+  var username = mysql.escape(username);
+  var password = mysql.escape(password);
 
   var conn = mysql.createConnection({
     host    : "ec2-52-1-159-248.compute-1.amazonaws.com",
