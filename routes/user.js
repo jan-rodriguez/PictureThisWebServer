@@ -28,7 +28,7 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT user.username, challenges.pic_path, challenges.location \
+    var query = " SELECT user.username, challenges.pic_path, challenges.latitude, challenges.longitude \
                   FROM user \
                   JOIN challenges \
                   ON user.id=challenges.challenger_id \
@@ -64,7 +64,7 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT user.username, challenges.pic_path, challenges.location \
+    var query = " SELECT user.username, challenges.pic_path, challenges.latitude, challenges.longitude \
                   FROM user \
                   JOIN challenges \
                   ON user.id=challenges.challenged_id \
@@ -157,7 +157,58 @@ router.post('/new', function(req, res, next) {
         return;
       }
       res.json({user_id: result.insertId});
-      console.log(result);
+    });
+
+    conn.end();
+  });
+
+});
+
+
+/* POST get user id given password and username */
+router.post('/login', function(req, res, next) {
+
+  var username = req.body.username;
+  var password = req.body.password;
+
+  //Make sure both username and password are specified
+  if(!username || !password) {
+    res.json ({error: "Please specify both username and password"});
+    return;
+  }
+
+  //SQL INJECTION SHALL NOT PASS!!!
+  var username = mysql.escape(username);
+  var password = mysql.escape(password);
+
+  var conn = mysql.createConnection(conn_params);
+
+  //Open connection to database
+  conn.connect(function(err) {
+    if(err) {
+      console.error(err.stack);
+      res.json({error: "Failed to connect to database"})
+      conn.end();
+      return;
+    }
+
+    var query = " SELECT id \
+                  FROM user \
+                  WHERE username ="+username+" \
+                  AND password="+password;
+    conn.query(query, function (err, result) {
+      if(err) {
+        console.error("********Failed to get user**********");
+        console.error(err.code);
+        res.json({error: "Failed to insert user to table"});
+        return;
+      }
+      //User found
+      if(result.length > 0) {
+        res.json(result[0]);
+      }else{
+        res.json({error: "No user found matching given username and password."});
+      }
     });
 
     conn.end();
