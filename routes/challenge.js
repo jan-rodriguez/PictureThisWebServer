@@ -23,13 +23,14 @@ router.get('/:chall_id(\\d+)', function(req, res, next) {
       return;
     }
 
-    var query = "SELECT user.username, challenged_id, pic_path, latitude, longitude \
+    var query = " SELECT user.id AS user_id, user.username, challenged_id, challenger_id, pic_path, latitude, longitude \
                   FROM challenges \
                   JOIN user \
-                  ON challenges.challenger_id = user.id \
+                    ON challenges.challenger_id = user.id \
+                    OR challenges.challenged_id = user.id \
                   WHERE challenges.id="+chall_id;
-    var challenged_id;
-    var final_result;
+
+    var final_result = {};
 
     conn.query(query, function (err, result) {
       if(err) {
@@ -39,50 +40,29 @@ router.get('/:chall_id(\\d+)', function(req, res, next) {
         return;
       }
 
-      //Assure there's a result
-      if(result.length > 0){
-        final_result = result[0];
-        final_result.challenger_username = final_result.username;
-        challenged_id = final_result.challenged_id;
-
-        //Remove unnecessary fields
-        delete final_result.username;
-        delete final_result.challenged_id;
-
-        //Get the challenged usersname
-        query = " SELECT username \
-                  FROM user \
-                  WHERE user.id="+challenged_id;
-        conn.query(query, function(err, result){
-          if(err) {
-            console.error("********Failed to get challenge**********");
-            console.error(err.code);
-            res.json({error: "Failed to get challenged for challenge"});
-            return;
-          }
-
-          if(result.length > 0) {
-            final_result.challenged_username = result[0].username;
-          }else{
-            res.json({error:"Couldn't find challenged from challange's challenged_id."});
-            return;
-          }
-          res.json(final_result);
-        });
-
-
-
-      }else{
-        res.json({error:"Failed to find challenge with id "+chall_id+" beacause it doesn't exist"});
+      if(result.length !== 2){
+        res.json({error: "Failed to find correct number of users for challenge."});
         return;
       }
+
+      final_result.pic_path = result[0].pic_path;
+      final_result.latitude = result[0].latitude;
+      final_result.longitude = result[0].longitude;
+
+      //Set correct challenger and challenged usernames
+      final_result.challenger_username = result[0].user_id === result[0].challenger_id ? result[0].username : result[1].username;
+      final_result.challenged_username = result[0].user_id === result[0].challenged_id ? result[0].username : result[1].username;
+
+      res.json(final_result);
+
+
     });
 
   });
 
 });
 
-/* POST home page. */
+/* POST create new challenge. */
 router.post('/new', function(req, res, next) {
 
   var challenger_id = req.headers.challenger_id;
@@ -129,15 +109,63 @@ router.post('/new', function(req, res, next) {
         }
 
       res.json({challange_id: result.insertId});
-      //TODO: GET RID OF THIS
     });
-
 
     conn.end();
   });
 });
 
+/**************RESPONSES*************/
+router.get('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next){
 
+  var chall_id = mysql.escape(req.params.chall_id);
+  var resp_id = mysql.escape(req.params.resp_id);
 
+  var conn = mysql.createConnection(conn_params);
+
+  //Open connection to database
+  conn.connect(function(err) {
+    if(err) {
+      console.error(err.stack);
+      res.json({error: "Failed to connect to database"})
+      conn.end();
+      return;
+    }
+
+    var query = " SELECT DISTINCT user.id AS user_id, user.username, responses.pic_path, responses.status, challenges.challenged_id, challenges.challenger_id \
+                  FROM responses \
+                  JOIN challenges \
+                    ON responses.challenge_id="+chall_id+" \
+                  JOIN user \
+                    ON user.id=challenges.challenger_id \
+                    OR user.id=challenges.challenged_id \
+                  WHERE responses.id="+resp_id;
+
+    conn.query(query, function (err, result) {
+      if(err) {
+        console.error("********Failed to get response**********");
+        console.error(err.code);
+        res.json({error: "Failed to get response from table."});
+        return;
+      }
+      var final_result = {};
+
+      if(result.length !== 2){
+        res.json({error: "Failed to find correct number of users for the challenge."});
+        return;
+      }
+
+      final_result.pic_path = result[0].pic_path;
+      final_result.status = result[0].status;
+
+      //Set correct challenger and challenged usernames
+      final_result.challenger_username = result[0].user_id === result[0].challenger_id ? result[0].username : result[1].username;
+      final_result.challenged_username = result[0].user_id === result[0].challenged_id ? result[0].username : result[1].username;
+
+      res.json(final_result);
+
+    });
+  });
+});
 
 module.exports = router;
