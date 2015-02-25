@@ -42,7 +42,10 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
         res.json({error: "Failed to get user created challenges"});
         return;
       }
-      res.json(result);
+      res.json({
+        total_hits:  result.length,
+        result:      result
+      });
     });
 
     conn.end();
@@ -78,7 +81,10 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
         res.json({error: "Failed to get user created challenges"});
         return;
       }
-      res.json(result);
+      res.json({
+        total_hits:  result.length,
+        result:      result
+      });
     });
 
     conn.end();
@@ -109,7 +115,10 @@ router.get('/all', function(req, res, next) {
       }
 
       //Return result to user
-      res.json(result);
+      res.json({
+        total_hits:  results.length,
+        result:      result
+      });
     });
 
     conn.end();

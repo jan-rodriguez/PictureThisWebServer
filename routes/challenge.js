@@ -9,6 +9,7 @@ var conn_params = {
     database: "picture_this",
   };
 
+//GET specific challenge
 router.get('/:chall_id(\\d+)', function(req, res, next) {
  var conn = mysql.createConnection(conn_params);
 
@@ -55,9 +56,9 @@ router.get('/:chall_id(\\d+)', function(req, res, next) {
 
       res.json(final_result);
 
-
     });
 
+    conn.end();
   });
 
 });
@@ -116,6 +117,51 @@ router.post('/new', function(req, res, next) {
 });
 
 /**************RESPONSES*************/
+
+//GET all responses to a challenge
+router.get('/:chall_id(\\d+)/response/all', function(req, res, next){
+
+  var chall_id = mysql.escape(req.params.chall_id);
+
+  var conn = mysql.createConnection(conn_params);
+
+  //Open connection to database
+  conn.connect(function(err) {
+    if(err) {
+      console.error(err.stack);
+      res.json({error: "Failed to connect to database"})
+      conn.end();
+      return;
+    }
+
+    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, responses.pic_path, responses.status \
+                  FROM challenges \
+                  JOIN responses \
+                    ON  responses.challenge_id=challenges.id \
+                  JOIN user AS challenger \
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
+                  WHERE challenges.id="+chall_id;
+    conn.query(query, function (err, result) {
+      if(err) {
+        console.error("********Failed to get response**********");
+        console.error(err.code);
+        res.json({error: "Failed to get response from table."});
+        return;
+      }
+
+      res.json({
+        total_hits: result.length,
+        result:     result
+      });
+    });
+
+    conn.end();
+  });
+});
+
+//GET specific response
 router.get('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next){
 
   var chall_id = mysql.escape(req.params.chall_id);
@@ -132,14 +178,16 @@ router.get('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next){
       return;
     }
 
-    var query = " SELECT DISTINCT user.id AS user_id, user.username, responses.pic_path, responses.status, challenges.challenged_id, challenges.challenger_id \
+    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, responses.pic_path, responses.status \
                   FROM responses \
                   JOIN challenges \
                     ON responses.challenge_id="+chall_id+" \
-                  JOIN user \
-                    ON user.id=challenges.challenger_id \
-                    OR user.id=challenges.challenged_id \
-                  WHERE responses.id="+resp_id;
+                  JOIN user AS challenger \
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
+                  WHERE responses.id="+resp_id+" \
+                  LIMIT 1";
 
     conn.query(query, function (err, result) {
       if(err) {
@@ -148,24 +196,155 @@ router.get('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next){
         res.json({error: "Failed to get response from table."});
         return;
       }
-      var final_result = {};
 
-      if(result.length !== 2){
-        res.json({error: "Failed to find correct number of users for the challenge."});
+      if(result.length === 0){
+        res.json({error: "Failed to find response."});
         return;
       }
 
-      final_result.pic_path = result[0].pic_path;
-      final_result.status = result[0].status;
-
-      //Set correct challenger and challenged usernames
-      final_result.challenger_username = result[0].user_id === result[0].challenger_id ? result[0].username : result[1].username;
-      final_result.challenged_username = result[0].user_id === result[0].challenged_id ? result[0].username : result[1].username;
-
-      res.json(final_result);
+      res.json(result[0]);
 
     });
+
+    conn.end();
   });
+});
+
+//GET most recent response to a challenge
+router.get('/:chall_id(\\d+)/response/recent', function(req, res, next){
+
+  var chall_id = mysql.escape(req.params.chall_id);
+
+  var conn = mysql.createConnection(conn_params);
+
+  //Open connection to database
+  conn.connect(function(err) {
+    if(err) {
+      console.error(err.stack);
+      res.json({error: "Failed to connect to database"})
+      conn.end();
+      return;
+    }
+
+    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, responses.pic_path, responses.status \
+                  FROM responses \
+                  JOIN challenges \
+                    ON responses.challenge_id=challenges.id \
+                  JOIN user AS challenger \
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
+                  WHERE responses.challenge_id="+chall_id+" \
+                  ORDER BY responses.id DESC \
+                  LIMIT 1";
+
+    conn.query(query, function (err, result) {
+      if(err) {
+        console.error("********Failed to get response**********");
+        console.error(err.code);
+        res.json({error: "Failed to get response from table."});
+        return;
+      }
+
+      if(result.length === 0){
+        res.json({error: "Failed to find response."});
+        return;
+      }
+
+      res.json(result[0]);
+    });
+
+    conn.end();
+  });
+});
+
+//POST accept or decline a specific response
+router.post('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next){
+
+  var decision = req.body.decision;
+  var resp_id = mysql.escape(req.params.resp_id);
+
+  console.log(decision);
+
+  if(!decision){
+    res.json({error: "Must specify response decision."});
+    return;
+  }
+
+  if(!(decision === 'accepted' || decision === 'declined')) {
+    res.json({error: "Decision must be either 'accepted' or 'declined'"});
+    return;
+  }
+
+  decision = mysql.escape(decision);
+
+  var conn = mysql.createConnection(conn_params);
+
+  //Open connection to database
+  conn.connect(function(err) {
+    if(err) {
+      console.error(err.stack);
+      res.json({error: "Failed to connect to database"})
+      conn.end();
+      return;
+    }
+
+    var query = " UPDATE responses \
+                  SET status="+decision+" \
+                  WHERE id="+resp_id;
+
+    conn.query(query, function (err, result) {
+      if(err) {
+        console.error("********Failed to update response**********");
+        console.error(err.code);
+        res.json({error: "Failed to update response."});
+        return;
+      }
+      res.sendStatus(200);
+    });
+
+    conn.end();
+  });
+});
+
+
+//POST create a new response for a given challenge
+router.post('/:chall_id(\\d+)/response/new', function(req, res, next){
+
+  var chall_id = mysql.escape(req.params.chall_id);
+  var pic_path = req.files.fileUpload.path;
+
+  //Sql-ize me captain!
+  pic_path = mysql.escape(pic_path.replace("public/", ""));
+
+  var conn = mysql.createConnection(conn_params);
+
+  //Open connection to database
+  conn.connect(function(err) {
+    if(err) {
+      console.error(err.stack);
+      res.json({error: "Failed to connect to database"})
+      conn.end();
+      return;
+    }
+
+    var query = " INSERT INTO responses \
+                    (challenge_id, pic_path, status) \
+                  VALUES ("+chall_id+", "+pic_path+", 'pending')";
+
+    conn.query(query, function(err, result){
+      if(err) {
+        console.error("********Failed to create response**********");
+        console.error(err.code);
+        res.json({error: "Failed to create response."});
+        return;
+      }
+      res.json({response_id: result.insertId});
+    });
+
+    conn.end();
+  });
+
 });
 
 module.exports = router;
