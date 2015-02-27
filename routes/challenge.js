@@ -216,7 +216,7 @@ router.get('/:chall_id(\\d+)/response/recent', function(req, res, next){
       return;
     }
 
-    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, responses.pic_path, responses.status \
+    var query = " SELECT responses.id AS response_id, challenger.username AS challenger_username, challenged.username AS challenged_username, responses.pic_path, responses.status \
                   FROM responses \
                   JOIN challenges \
                     ON responses.challenge_id=challenges.id \
