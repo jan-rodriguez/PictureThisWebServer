@@ -219,6 +219,7 @@ router.get('/:chall_id(\\d+)/response/recent', function(req, res, next){
                   JOIN user AS challenged \
                     ON challenged.id=challenges.challenged_id \
                   WHERE responses.challenge_id="+chall_id+" \
+                    AND  `status`='pending' \
                   ORDER BY responses.id DESC \
                   LIMIT 1";
 
@@ -261,7 +262,10 @@ router.post('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next)
 
   decision = mysql.escape(decision);
 
-  var conn = mysql.createConnection(conn_params);
+  var new_params = conn_params;
+  new_params.multipleStatements = true;
+
+  var conn = mysql.createConnection(new_params);
 
   //Open connection to database
   conn.connect(function(err) {
@@ -272,19 +276,18 @@ router.post('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next)
       return;
     }
 
-    var query = " UPDATE responses \
-                  SET status="+decision+" \
-                  WHERE id="+resp_id;
-    if(decision === 'accepted') {
-      query += ";  UPDATE challenges \
-                    SET active = '0' \
-                  WHERE id="+chall_id;
+    var query = " UPDATE `responses` SET `status`="+decision+" WHERE id="+resp_id;
+    if(decision === mysql.escape('accepted')) {
+      query += "; \n UPDATE `challenges` SET `active`='0' WHERE id="+chall_id+";";
     }
+
+    console.log(query);
 
     conn.query(query, function (err, result) {
       if(err) {
         console.error("********Failed to update response**********");
         console.error(err.code);
+        console.error(err.stack);
         res.json({error: "Failed to update response."});
         return;
       }
