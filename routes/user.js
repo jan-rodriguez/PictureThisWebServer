@@ -120,7 +120,7 @@ router.get('/all', function(req, res, next) {
 
       //Return result to user
       res.json({
-        total_hits:  results.length,
+        total_hits:  result.length,
         result:      result
       });
     });
