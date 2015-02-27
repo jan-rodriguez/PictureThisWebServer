@@ -28,12 +28,14 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT user.username, challenges.pic_path, challenges.latitude, challenges.longitude \
-                  FROM user \
-                  JOIN challenges \
-                  ON user.id=challenges.challenger_id \
+    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.id AS challenge_id, challenges.pic_path, challenges.latitude, challenges.longitude \
+                  FROM challenges \
+                  JOIN user AS challenger\
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
                   WHERE challenges.active='1' \
-                  AND challenges.challenger_id="+user_id;
+                    AND challenges.challenger_id="+user_id;
 
     conn.query(query, function(err, result) {
       if(err){
@@ -67,12 +69,14 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT user.username, challenges.pic_path, challenges.latitude, challenges.longitude \
-                  FROM user \
-                  JOIN challenges \
-                  ON user.id=challenges.challenged_id \
+    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.id AS challenge_id, challenges.pic_path, challenges.latitude, challenges.longitude \
+                  FROM challenges \
+                  JOIN user AS challenger\
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
                   WHERE challenges.active='1' \
-                  AND challenges.challenged_id="+user_id;
+                    AND challenges.challenged_id="+user_id;
 
     conn.query(query, function(err, result) {
       if(err){
