@@ -24,14 +24,13 @@ router.get('/:chall_id(\\d+)', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT user.id AS user_id, user.username, challenged_id, challenger_id, pic_path, latitude, longitude \
+    var query = " SELECT challenged.username AS challenged_username, challenger.username AS challenger_username,  pic_path, latitude, longitude \
                   FROM challenges \
-                  JOIN user \
-                    ON challenges.challenger_id = user.id \
-                    OR challenges.challenged_id = user.id \
+                  JOIN user AS challenger \
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
                   WHERE challenges.id="+chall_id;
-
-    var final_result = {};
 
     conn.query(query, function (err, result) {
       if(err) {
@@ -41,20 +40,7 @@ router.get('/:chall_id(\\d+)', function(req, res, next) {
         return;
       }
 
-      if(result.length !== 2){
-        res.json({error: "Failed to find correct number of users for challenge."});
-        return;
-      }
-
-      final_result.pic_path = result[0].pic_path;
-      final_result.latitude = result[0].latitude;
-      final_result.longitude = result[0].longitude;
-
-      //Set correct challenger and challenged usernames
-      final_result.challenger_username = result[0].user_id === result[0].challenger_id ? result[0].username : result[1].username;
-      final_result.challenged_username = result[0].user_id === result[0].challenged_id ? result[0].username : result[1].username;
-
-      res.json(final_result);
+      res.json(result);
 
     });
 
@@ -70,9 +56,13 @@ router.post('/new', function(req, res, next) {
   var challenged_id = req.headers.challenged_id;
   var latitude = req.headers.latitude;
   var longitude = req.headers.longitude;
-  var pic_path = req.files.fileUpload.path;
+  var pic_path = "";
 
-  // console.log(req);
+  if(req.files && req.files.fileUpload && req.files.fileUpload.path){
+    pic_path = req.files.fileUpload.path;
+  }else{
+    pic_path = "images/8a97ea4b38ecaabb7e30ead947d1c799.jpg";
+  }
 
   if(!challenger_id || !challenged_id || !latitude || !longitude) {
     res.json({error: "Must specify challenger_id, challenged_id, latitude, and longitude."});
@@ -312,7 +302,13 @@ router.post('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next)
 router.post('/:chall_id(\\d+)/response/new', function(req, res, next){
 
   var chall_id = mysql.escape(req.params.chall_id);
-  var pic_path = req.files.fileUpload.path;
+  var pic_path = "";
+
+  if(req.files && req.files.fileUpload && req.files.fileUpload.path){
+    pic_path = req.files.fileUpload.path;
+  }else{
+    pic_path = "images/8a97ea4b38ecaabb7e30ead947d1c799.jpg";
+  }
 
   //Sql-ize me captain!
   pic_path = mysql.escape(pic_path.replace("public/", ""));
