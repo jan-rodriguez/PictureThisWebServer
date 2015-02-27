@@ -247,8 +247,7 @@ router.post('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next)
 
   var decision = req.body.decision;
   var resp_id = mysql.escape(req.params.resp_id);
-
-  console.log(decision);
+  var chall_id = mysql.escape(req.params.chall_id);
 
   if(!decision){
     res.json({error: "Must specify response decision."});
@@ -276,6 +275,11 @@ router.post('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next)
     var query = " UPDATE responses \
                   SET status="+decision+" \
                   WHERE id="+resp_id;
+    if(decision === 'accepted') {
+      query += ";  UPDATE challenges \
+                    SET active = '0' \
+                  WHERE id="+chall_id;
+    }
 
     conn.query(query, function (err, result) {
       if(err) {
