@@ -4,7 +4,6 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var multer = require('multer');
 
 var routes = require('./routes/index');
 var challenge = require('./routes/challenge');
@@ -23,7 +22,6 @@ app.use(bodyParser.json({limit: "50mb", parameterLimit: 10000}));
 app.use(bodyParser.urlencoded({ extended: false, limit: "50mb", parameterLimit: 10000 }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(multer({dest: './public/images'}));
 
 //ROUTES!!
 app.use('/', routes);
