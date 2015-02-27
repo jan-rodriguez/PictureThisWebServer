@@ -52,20 +52,14 @@ router.get('/:chall_id(\\d+)', function(req, res, next) {
 /* POST create new challenge. */
 router.post('/new', function(req, res, next) {
 
-  var challenger_id = req.headers.challenger_id;
-  var challenged_id = req.headers.challenged_id;
-  var latitude = req.headers.latitude;
-  var longitude = req.headers.longitude;
-  var pic_path = "";
+  var challenger_id = req.body.challenger_id;
+  var challenged_id = req.body.challenged_id;
+  var latitude = req.body.latitude;
+  var longitude = req.body.longitude;
+  var pic_path = req.body.pic_path;
 
-  if(req.files && req.files.fileUpload && req.files.fileUpload.path){
-    pic_path = req.files.fileUpload.path;
-  }else{
-    pic_path = "images/8a97ea4b38ecaabb7e30ead947d1c799.jpg";
-  }
-
-  if(!challenger_id || !challenged_id || !latitude || !longitude) {
-    res.json({error: "Must specify challenger_id, challenged_id, latitude, and longitude."});
+  if(!challenger_id || !challenged_id || !latitude || !longitude || !pic_path) {
+    res.json({error: "Must specify challenger_id, challenged_id, pic_path, latitude, and longitude."});
     return;
   }
 
@@ -74,7 +68,7 @@ router.post('/new', function(req, res, next) {
   challenged_id = mysql.escape(challenged_id);
   latitude = mysql.escape(latitude);
   longitude = mysql.escape(longitude);
-  pic_path = mysql.escape(pic_path.replace("public/", ""));
+  pic_path = mysql.escape(pic_path);
 
   var conn = mysql.createConnection(conn_params);
 
@@ -302,16 +296,15 @@ router.post('/:chall_id(\\d+)/response/:resp_id(\\d+)', function(req, res, next)
 router.post('/:chall_id(\\d+)/response/new', function(req, res, next){
 
   var chall_id = mysql.escape(req.params.chall_id);
-  var pic_path = "";
+  var pic_path = req.body.pic_path;
 
-  if(req.files && req.files.fileUpload && req.files.fileUpload.path){
-    pic_path = req.files.fileUpload.path;
-  }else{
-    pic_path = "images/8a97ea4b38ecaabb7e30ead947d1c799.jpg";
+  if(!pic_path) {
+    res.json({erro: "You must specify a pic_path."});
+    return;
   }
 
   //Sql-ize me captain!
-  pic_path = mysql.escape(pic_path.replace("public/", ""));
+  pic_path = mysql.escape(pic_path);
 
   var conn = mysql.createConnection(conn_params);
 
