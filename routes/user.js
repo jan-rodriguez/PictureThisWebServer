@@ -20,6 +20,11 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
 
   var conn = mysql.createConnection(conn_params);
 
+  //Variables keeping track of what fields of the response have been populated
+  var got_done, got_action_required, got_waiting = false;
+
+  var final_result = {};
+
   conn.connect(function(err){
     if(err) {
       console.error(err.stack);
@@ -28,27 +33,113 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.id AS challenge_id, challenges.pic_path, challenges.latitude, challenges.longitude \
+    //Get all DISTINCT challenges with pending responses
+    var action_required_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
                   JOIN user AS challenged \
                     ON challenged.id=challenges.challenged_id \
+                  JOIN responses \
+                    ON (responses.challenge_id=challenges.id \
+                    AND responses.status='pending') \
                   WHERE challenges.active='1' \
                     AND challenges.challenger_id="+user_id;
 
-    conn.query(query, function(err, result) {
+    conn.query(action_required_query, function(err, result){
       if(err){
-        console.log("*************Failed to get user challenger**********");
-        console.log(err.code);
+        console.log("*************Failed to get user challenger with action required**********");
+        console.log(err);
         res.json({error: "Failed to get user created challenges"});
         return;
       }
-      res.json({
-        total_hits:  result.length,
-        result:      result
-      });
+
+      //Set the list of action required
+      final_result.action_required = {
+        total_hits: result.length,
+        result:     result
+      };
+
+      got_action_required = true;
+
+      sendFinalResult();
+
     });
+
+    //Select all active challenges with either declined responses or no responses
+    var waiting_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+                  FROM challenges \
+                  JOIN user AS challenger\
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
+                  LEFT OUTER JOIN responses \
+                    ON (responses.challenge_id=challenges.id \
+                    AND responses.status='declined') \
+                  WHERE challenges.active='1' \
+                    AND challenges.challenger_id="+user_id;
+
+    conn.query(waiting_query, function(err, result){
+      if(err){
+        console.log("*************Failed to get user challenger with waiting required**********");
+        console.log(err);
+        res.json({error: "Failed to get user created challenges"});
+        return;
+      }
+
+      //Set the list of waiting challenges
+      final_result.waiting = {
+        total_hits: result.length,
+        result:     result
+      };
+
+      got_waiting = true;
+
+      sendFinalResult();
+
+    });
+
+    //Select all challenges with an accepted response
+    var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+                  FROM challenges \
+                  JOIN user AS challenger\
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
+                  LEFT JOIN responses \
+                    ON (responses.challenge_id=challenges.id \
+                    AND responses.status='accepted') \
+                  WHERE challenges.challenger_id="+user_id+" \
+                    AND challenges.active='0' \
+                    AND challenges.challenger_dismissed='0'" ;
+
+    conn.query(done_query, function(err, result){
+      if(err){
+        console.log("*************Failed to get user challenger that are done**********");
+        console.log(err);
+        res.json({error: "Failed to get user created challenges"});
+        return;
+      }
+
+      //Set the list of waiting challenges
+      final_result.done = {
+        total_hits: result.length,
+        result:     result
+      };
+
+      got_done = true;
+
+      sendFinalResult();
+    });
+
+
+    //Call back to send final result
+    function sendFinalResult() {
+      //Only send once all the results have been set
+      if(got_done && got_waiting && got_action_required) {
+        res.json(final_result);
+      }
+    }
 
     conn.end();
   });
@@ -61,6 +152,11 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
 
   var conn = mysql.createConnection(conn_params);
 
+  //Variables keeping track of what fields of the response have been populated
+  var got_done, got_action_required, got_waiting = false;
+
+  var final_result = {};
+
   conn.connect(function(err){
     if(err) {
       console.error(err.stack);
@@ -69,27 +165,113 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.id AS challenge_id, challenges.pic_path, challenges.latitude, challenges.longitude \
+    //Get all DISTINCT challenges with pending responses
+    var action_required_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
                   JOIN user AS challenged \
                     ON challenged.id=challenges.challenged_id \
+                  LEFT JOIN responses \
+                    ON (responses.challenge_id=challenges.id \
+                    AND responses.status='declined') \
                   WHERE challenges.active='1' \
                     AND challenges.challenged_id="+user_id;
 
-    conn.query(query, function(err, result) {
+    conn.query(action_required_query, function(err, result){
       if(err){
-        console.log("*************Failed to get user challenger**********");
-        console.log(err.code);
+        console.log("*************Failed to get user challenger with action required**********");
+        console.log(err);
         res.json({error: "Failed to get user created challenges"});
         return;
       }
-      res.json({
-        total_hits:  result.length,
-        result:      result
-      });
+
+      //Set the list of action required
+      final_result.action_required = {
+        total_hits: result.length,
+        result:     result
+      };
+
+      got_action_required = true;
+
+      sendFinalResult();
+
     });
+
+    //Select all active challenges with pending reponses
+    var waiting_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+                  FROM challenges \
+                  JOIN user AS challenger\
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
+                  LEFT OUTER JOIN responses \
+                    ON (responses.challenge_id=challenges.id \
+                    AND responses.status='pending') \
+                  WHERE challenges.active='1' \
+                    AND challenges.challenged_id="+user_id;
+
+    conn.query(waiting_query, function(err, result){
+      if(err){
+        console.log("*************Failed to get user challenger with waiting required**********");
+        console.log(err);
+        res.json({error: "Failed to get user created challenges"});
+        return;
+      }
+
+      //Set the list of waiting challenges
+      final_result.waiting = {
+        total_hits: result.length,
+        result:     result
+      };
+
+      got_waiting = true;
+
+      sendFinalResult();
+
+    });
+
+    //Select all challenges with an accepted response
+    var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+                  FROM challenges \
+                  JOIN user AS challenger\
+                    ON challenger.id=challenges.challenger_id \
+                  JOIN user AS challenged \
+                    ON challenged.id=challenges.challenged_id \
+                  JOIN responses \
+                    ON (responses.challenge_id=challenges.id \
+                    AND responses.status='accepted') \
+                  WHERE challenges.challenged_id="+user_id+" \
+                    AND challenges.active='0' \
+                    AND challenges.challenged_dismissed='0'" ;
+
+    conn.query(done_query, function(err, result){
+      if(err){
+        console.log("*************Failed to get user challenger that are done**********");
+        console.log(err);
+        res.json({error: "Failed to get user created challenges"});
+        return;
+      }
+
+      //Set the list of waiting challenges
+      final_result.done = {
+        total_hits: result.length,
+        result:     result
+      };
+
+      got_done = true;
+
+      sendFinalResult();
+    });
+
+
+    //Call back to send final result
+    function sendFinalResult() {
+      //Only send once all the results have been set
+      if(got_done && got_waiting && got_action_required) {
+        res.json(final_result);
+      }
+    }
 
     conn.end();
   });
@@ -97,6 +279,16 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
 
 /* GET all users */
 router.get('/all', function(req, res, next) {
+
+  var user_id = req.headers.user_id;
+
+  if(!user_id){
+    res.json({error: "User id must be specified."});
+    return;
+  }
+
+  //Sql-me-not
+  user_id = mysql.escape(user_id);
 
   var conn = mysql.createConnection(conn_params);
 
@@ -108,7 +300,9 @@ router.get('/all', function(req, res, next) {
       return;
     }
 
-    var query = "SELECT id, username FROM user";
+    var query = " SELECT id, username \
+                    FROM user \
+                  WHERE id!="+user_id;
 
     conn.query(query, function(err, result) {
       if(err) {
@@ -227,6 +421,44 @@ router.post('/login', function(req, res, next) {
     conn.end();
   });
 
+});
+
+
+router.post('/:user_id(\\d+)/challenge/:chall_id(\\d+)/hide', function(req, res, next) {
+
+  var user_id = mysql.escape(req.params.user_id);
+  var chall_id = mysql.escape(req.params.chall_id);
+
+  var conn = mysql.createConnection(conn_params);
+
+  //Open connection to database
+  conn.connect(function(err) {
+    if(err) {
+      console.error(err.stack);
+      res.json({error: "Failed to connect to database"})
+      conn.end();
+      return;
+    }
+
+    //Update appropriate challenger field ONLY WORKS ON INACTIVE OR COMPLETED CHALLENGES
+    var query = " UPDATE challenges \
+                    SET challenged_dismissed = CASE WHEN (challenged_id="+user_id+") THEN '1' ELSE challenged_dismissed END, \
+                        challenger_dismissed = CASE WHEN (challenger_id="+user_id+") THEN '1' ELSE challenger_dismissed END \
+                  WHERE id="+chall_id+" \
+                    AND active='0'";
+
+    conn.query(query, function (err, result) {
+      if(err) {
+        console.error("********Failed to get user**********");
+        console.error(err);
+        res.json({error: "Failed to dismiss challenge"});
+        return;
+      }
+
+      res.sendStatus(200);
+    });
+    conn.end();
+  });
 });
 
 module.exports = router;
