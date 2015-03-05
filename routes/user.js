@@ -44,7 +44,9 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
                     ON (responses.challenge_id=challenges.id \
                     AND responses.status='pending') \
                   WHERE challenges.active='1' \
-                    AND challenges.challenger_id="+user_id;
+                    AND challenges.challenger_id="+user_id+" \
+                    AND responses.id = \
+                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id)";
 
     conn.query(action_required_query, function(err, result){
       if(err){
@@ -74,10 +76,12 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
                   JOIN user AS challenged \
                     ON challenged.id=challenges.challenged_id \
                   LEFT OUTER JOIN responses \
-                    ON (responses.challenge_id=challenges.id \
-                    AND responses.status='declined') \
+                    ON responses.status='declined' \
                   WHERE challenges.active='1' \
-                    AND challenges.challenger_id="+user_id;
+                    AND challenges.challenger_id="+user_id+" \
+                    AND (responses.id = \
+                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) \
+                      OR (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) IS NULL)";
 
     conn.query(waiting_query, function(err, result){
       if(err){
@@ -99,14 +103,14 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
 
     });
 
-    //Select all challenges with an accepted response
+    //Select all challenges with an accepted response and is not dismissed by challenger
     var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
                   JOIN user AS challenged \
                     ON challenged.id=challenges.challenged_id \
-                  LEFT JOIN responses \
+                  JOIN responses \
                     ON (responses.challenge_id=challenges.id \
                     AND responses.status='accepted') \
                   WHERE challenges.challenger_id="+user_id+" \
@@ -165,7 +169,7 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
       return;
     }
 
-    //Get all DISTINCT challenges with pending responses
+    //Get all DISTINCT challenges with declined responses or no responses
     var action_required_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
                   FROM challenges \
                   JOIN user AS challenger\
@@ -176,7 +180,10 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
                     ON (responses.challenge_id=challenges.id \
                     AND responses.status='declined') \
                   WHERE challenges.active='1' \
-                    AND challenges.challenged_id="+user_id;
+                    AND challenges.challenged_id="+user_id+" \
+                    AND (responses.id = \
+                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) \
+                      OR (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) IS NULL)";
 
     conn.query(action_required_query, function(err, result){
       if(err){
@@ -205,11 +212,13 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
                     ON challenger.id=challenges.challenger_id \
                   JOIN user AS challenged \
                     ON challenged.id=challenges.challenged_id \
-                  LEFT OUTER JOIN responses \
+                  JOIN responses \
                     ON (responses.challenge_id=challenges.id \
                     AND responses.status='pending') \
                   WHERE challenges.active='1' \
-                    AND challenges.challenged_id="+user_id;
+                    AND challenges.challenged_id="+user_id+" \
+                    AND responses.id = \
+                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id)";
 
     conn.query(waiting_query, function(err, result){
       if(err){
@@ -231,7 +240,7 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
 
     });
 
-    //Select all challenges with an accepted response
+    //Select all challenges with an accepted response and is not dismissed by challenged
     var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
                   FROM challenges \
                   JOIN user AS challenger\
