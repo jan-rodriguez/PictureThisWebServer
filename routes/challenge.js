@@ -219,7 +219,7 @@ router.get('/:chall_id(\\d+)/response/recent', function(req, res, next){
                   JOIN user AS challenged \
                     ON challenged.id=challenges.challenged_id \
                   WHERE responses.challenge_id="+chall_id+" \
-                    AND  `status`='pending' \
+                    AND  `status`!='declined' \
                   ORDER BY responses.id DESC \
                   LIMIT 1";
 
