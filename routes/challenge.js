@@ -24,7 +24,7 @@ router.get('/:chall_id(\\d+)', function(req, res, next) {
       return;
     }
 
-    var query = " SELECT challenged.username AS challenged_username, challenger.username AS challenger_username,  pic_path, latitude, longitude \
+    var query = " SELECT challenged.username AS challenged_username, challenger.username AS challenger_username,  pic_path, latitude, longitude, start_date \
                   FROM challenges \
                   JOIN user AS challenger \
                     ON challenger.id=challenges.challenger_id \
@@ -57,9 +57,15 @@ router.post('/new', function(req, res, next) {
   var latitude = req.body.latitude;
   var longitude = req.body.longitude;
   var pic_path = req.body.pic_path;
+  var title = req.body.title;
 
-  if(!challenger_id || !challenged_id || !latitude || !longitude || !pic_path) {
-    res.json({error: "Must specify challenger_id, challenged_id, pic_path, latitude, and longitude."});
+  if(!challenger_id || !challenged_id || !latitude || !longitude || !pic_path || !title) {
+    res.json({error: "Must specify title, challenger_id, challenged_id, pic_path, latitude, and longitude."});
+    return;
+  }
+
+  if(title.length > 15){
+    res.json({error: "Title cannot be more than 15 characters"});
     return;
   }
 
@@ -69,6 +75,7 @@ router.post('/new', function(req, res, next) {
   latitude = mysql.escape(latitude);
   longitude = mysql.escape(longitude);
   pic_path = mysql.escape(pic_path);
+  title = mysql.escape(title);
 
   var conn = mysql.createConnection(conn_params);
 
@@ -82,9 +89,9 @@ router.post('/new', function(req, res, next) {
     }
 
     var query = " INSERT INTO challenges \
-                    (challenger_id, challenged_id, active, latitude, longitude, pic_path) \
+                    (title, challenger_id, challenged_id, active, latitude, longitude, pic_path, start_date) \
                   VALUES \
-                    ("+challenger_id+", "+challenged_id+", '1', "+latitude+", "+longitude+", "+pic_path+")";
+                    ("+title+", "+challenger_id+", "+challenged_id+", '1', "+latitude+", "+longitude+", "+pic_path+", NOW())";
     conn.query(query, function (err, result) {
       if(err) {
           console.error("********Failed to insert challenge**********");

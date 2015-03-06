@@ -34,7 +34,7 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
     }
 
     //Get all DISTINCT challenges with pending responses
-    var action_required_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+    var action_required_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude, challenges.start_date, challenges.title \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
@@ -56,6 +56,11 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
         return;
       }
 
+      result.forEach(function(elt, index){
+        //Nicely format the start dates for challenges
+        elt.start_date = new Date(elt.start_date).toDateString();
+      });
+
       //Set the list of action required
       final_result.action_required = {
         total_hits: result.length,
@@ -69,7 +74,7 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
     });
 
     //Select all active challenges with either declined responses or no responses
-    var waiting_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+    var waiting_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude, challenges.start_date, challenges.title \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
@@ -91,6 +96,11 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
         return;
       }
 
+      result.forEach(function(elt, index){
+        //Nicely format the start dates for challenges
+        elt.start_date = new Date(elt.start_date).toDateString();
+      });
+
       //Set the list of waiting challenges
       final_result.waiting = {
         total_hits: result.length,
@@ -104,7 +114,7 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
     });
 
     //Select all challenges with an accepted response and is not dismissed by challenger
-    var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+    var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude, challenges.start_date, challenges.title \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
@@ -124,6 +134,11 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
         res.json({error: "Failed to get user created challenges"});
         return;
       }
+
+      result.forEach(function(elt, index){
+        //Nicely format the start dates for challenges
+        elt.start_date = new Date(elt.start_date).toDateString();
+      });
 
       //Set the list of waiting challenges
       final_result.done = {
@@ -170,7 +185,7 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
     }
 
     //Get all DISTINCT challenges with declined responses or no responses
-    var action_required_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+    var action_required_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude, challenges.start_date, challenges.title \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
@@ -193,6 +208,11 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
         return;
       }
 
+      result.forEach(function(elt, index){
+        //Nicely format the start dates for challenges
+        elt.start_date = new Date(elt.start_date).toDateString();
+      });
+
       //Set the list of action required
       final_result.action_required = {
         total_hits: result.length,
@@ -206,7 +226,7 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
     });
 
     //Select all active challenges with pending reponses
-    var waiting_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+    var waiting_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude, challenges.start_date, challenges.title \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
@@ -228,6 +248,11 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
         return;
       }
 
+      result.forEach(function(elt, index){
+        //Nicely format the start dates for challenges
+        elt.start_date = new Date(elt.start_date).toDateString();
+      });
+
       //Set the list of waiting challenges
       final_result.waiting = {
         total_hits: result.length,
@@ -241,7 +266,7 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
     });
 
     //Select all challenges with an accepted response and is not dismissed by challenged
-    var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude \
+    var done_query = " SELECT DISTINCT challenges.id AS challenge_id, challenger.username AS challenger_username, challenged.username AS challenged_username, challenges.pic_path, challenges.latitude, challenges.longitude, challenges.start_date, challenges.title \
                   FROM challenges \
                   JOIN user AS challenger\
                     ON challenger.id=challenges.challenger_id \
@@ -261,6 +286,11 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
         res.json({error: "Failed to get user created challenges"});
         return;
       }
+
+      result.forEach(function(elt, index){
+        //Nicely format the start dates for challenges
+        elt.start_date = new Date(elt.start_date).toDateString();
+      });
 
       //Set the list of waiting challenges
       final_result.done = {
