@@ -4,7 +4,7 @@ var mysql = require('mysql');
 var conn_params = {
     host    : "ec2-52-1-159-248.compute-1.amazonaws.com",
     user    : "root",
-    password: "root",
+    password: "picturethis123",
     port    : 3306,
     database: "picture_this",
   };
