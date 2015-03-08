@@ -107,6 +107,12 @@ router.post('/new', function(req, res, next) {
   });
 });
 
+
+//Get the web view of the challenge's map
+router.get('/:chall_id(\\d+)/map', function(req, res, next) {
+  res.render('map');
+});
+
 /**************RESPONSES*************/
 
 //GET all responses to a challenge
