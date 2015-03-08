@@ -45,8 +45,8 @@ $(document).ready(function(){
       radius: circleRadius
     };
 
-     //Draw circle
-     var newCircle = new google.maps.Circle(hintCircle);
+    //Draw circle
+    var newCircle = new google.maps.Circle(hintCircle);
 
 
     var GeoMarker = new GeolocationMarker(map);
