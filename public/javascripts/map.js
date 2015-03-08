@@ -12,9 +12,16 @@ $(document).ready(function(){
   function initializeMap(location) {
     var mapCanvas = document.getElementById('map-canvas');
 
+    var squareLen = .003;
+
     var latitude = location.latitude;
     var longitude = location.longitude;
 
+    //Add randomness to location, so it's not always in the middle
+    var randomNoise = Math.random() * squareLen / 1.5;
+    latitude = Math.random() > .5 ? latitude + randomNoise : latitude - randomNoise;
+    randomNoise = Math.random() * squareLen / 1.5;
+    longitude = Math.random() > .5 ? longitude + randomNoise : longitude - randomNoise;
 
 
     var mapOptions = {
@@ -27,7 +34,7 @@ $(document).ready(function(){
 
     var map = new google.maps.Map(mapCanvas, mapOptions);
 
-    var squareLen = .003;
+
 
     var squareCoords = [
       new google.maps.LatLng(latitude + squareLen, longitude - squareLen),
