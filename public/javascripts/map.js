@@ -27,7 +27,7 @@ $(document).ready(function(){
 
     var map = new google.maps.Map(mapCanvas, mapOptions);
 
-    var squareLen = .002;
+    var squareLen = .003;
 
     var squareCoords = [
       new google.maps.LatLng(latitude + squareLen, longitude - squareLen),
