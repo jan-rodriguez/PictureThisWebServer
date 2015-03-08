@@ -12,16 +12,16 @@ $(document).ready(function(){
   function initializeMap(location) {
     var mapCanvas = document.getElementById('map-canvas');
 
-    var noiseMax = .003;
+    var noiseMax = .002;
     var circleRadius = 400;
 
     var latitude = location.latitude;
     var longitude = location.longitude;
 
     //Add randomness to location, so it's not always in the middle
-    var randomNoise = Math.random() * noiseMax / 1.5;
+    var randomNoise = Math.random() * noiseMax;
     latitude = Math.random() > .5 ? latitude + randomNoise : latitude - randomNoise;
-    randomNoise = Math.random() * noiseMax / 1.5;
+    randomNoise = Math.random() * noiseMax;
     longitude = Math.random() > .5 ? longitude + randomNoise : longitude - randomNoise;
 
 
@@ -39,7 +39,7 @@ $(document).ready(function(){
       strokeOpacity: 0.8,
       strokeWeight: 2,
       fillColor: '#00AA00',
-      fillOpacity: 0.35,
+      fillOpacity: 0.15,
       map: map,
       center: new google.maps.LatLng(latitude, longitude),
       radius: circleRadius
@@ -51,12 +51,12 @@ $(document).ready(function(){
 
     var GeoMarker = new GeolocationMarker(map);
 
-    GeoMarker.setMarkerOptions({
+    GeoMarker.setCircleOptions({
       strokeColor: '#cccccc',
       strokeOpacity: 0.8,
       strokeWeight: 2,
       fillColor: '#cccccc',
-      fillOpacity: 0.35
+      fillOpacity: 0.5
     });
 
     //Error handling
