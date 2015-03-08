@@ -12,15 +12,16 @@ $(document).ready(function(){
   function initializeMap(location) {
     var mapCanvas = document.getElementById('map-canvas');
 
-    var squareLen = .003;
+    var noiseMax = .003;
+    var circleRadius = 400;
 
     var latitude = location.latitude;
     var longitude = location.longitude;
 
     //Add randomness to location, so it's not always in the middle
-    var randomNoise = Math.random() * squareLen / 1.5;
+    var randomNoise = Math.random() * noiseMax / 1.5;
     latitude = Math.random() > .5 ? latitude + randomNoise : latitude - randomNoise;
-    randomNoise = Math.random() * squareLen / 1.5;
+    randomNoise = Math.random() * noiseMax / 1.5;
     longitude = Math.random() > .5 ? longitude + randomNoise : longitude - randomNoise;
 
 
@@ -30,31 +31,47 @@ $(document).ready(function(){
       mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 
-    var hintLocation;
-
     var map = new google.maps.Map(mapCanvas, mapOptions);
 
-
-
-    var squareCoords = [
-      new google.maps.LatLng(latitude + squareLen, longitude - squareLen),
-      new google.maps.LatLng(latitude + squareLen, longitude + squareLen),
-      new google.maps.LatLng(latitude - squareLen, longitude + squareLen),
-      new google.maps.LatLng(latitude - squareLen, longitude - squareLen),
-      new google.maps.LatLng(latitude + squareLen, longitude - squareLen)
-    ];
-
     // Construct the polygon.
-    hintLocation = new google.maps.Polygon({
-      paths: squareCoords,
-      strokeColor: '#00FF00',
+    hintCircle = {
+      strokeColor: '#00AA00',
       strokeOpacity: 0.8,
       strokeWeight: 2,
-      fillColor: '#00FF00',
+      fillColor: '#00AA00',
+      fillOpacity: 0.35,
+      map: map,
+      center: new google.maps.LatLng(latitude, longitude),
+      radius: circleRadius
+    };
+
+     //Draw circle
+     var newCircle = new google.maps.Circle(hintCircle);
+
+
+    var GeoMarker = new GeolocationMarker(map);
+
+    GeoMarker.setMarkerOptions({
+      strokeColor: '#cccccc',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#cccccc',
       fillOpacity: 0.35
     });
 
-    hintLocation.setMap(map);
+    //Error handling
+    GeoMarker.addListener('geolocation_error', function(error){
+      if(error.code === 1){
+        alert("Error getting location. Access denied.")
+      }
+      else if(error.code === 2){
+        alert("Error getting location. Location unavailable.")
+      }
+      else{
+        alert("Error getting location.")
+      }
+    });
+
   }
 
   function getChallengeLocation(challengeId) {
