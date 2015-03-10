@@ -46,7 +46,8 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
                   WHERE challenges.active='1' \
                     AND challenges.challenger_id="+user_id+" \
                     AND responses.id = \
-                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id)";
+                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) \
+                  ORDER BY start_date DESC";
 
     conn.query(action_required_query, function(err, result){
       if(err){
@@ -86,7 +87,8 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
                     AND challenges.challenger_id="+user_id+" \
                     AND (responses.id = \
                       (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) \
-                      OR (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) IS NULL)";
+                      OR (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) IS NULL) \
+                  ORDER BY start_date DESC";
 
     conn.query(waiting_query, function(err, result){
       if(err){
@@ -125,7 +127,8 @@ router.get('/:user_id(\\d+)/challenge/challenger', function(req, res, next) {
                     AND responses.status='accepted') \
                   WHERE challenges.challenger_id="+user_id+" \
                     AND challenges.active='0' \
-                    AND challenges.challenger_dismissed='0'" ;
+                    AND challenges.challenger_dismissed='0' \
+                  ORDER BY start_date DESC" ;
 
     conn.query(done_query, function(err, result){
       if(err){
@@ -198,7 +201,8 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
                     AND challenges.challenged_id="+user_id+" \
                     AND (responses.id = \
                       (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) \
-                      OR (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) IS NULL)";
+                      OR (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) IS NULL) \
+                  ORDER BY start_date DESC";
 
     conn.query(action_required_query, function(err, result){
       if(err){
@@ -238,7 +242,8 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
                   WHERE challenges.active='1' \
                     AND challenges.challenged_id="+user_id+" \
                     AND responses.id = \
-                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id)";
+                      (SELECT MAX(id) FROM responses WHERE responses.challenge_id=challenges.id) \
+                  ORDER BY start_date DESC";
 
     conn.query(waiting_query, function(err, result){
       if(err){
@@ -277,7 +282,8 @@ router.get('/:user_id(\\d+)/challenge/challenged', function(req, res, next) {
                     AND responses.status='accepted') \
                   WHERE challenges.challenged_id="+user_id+" \
                     AND challenges.active='0' \
-                    AND challenges.challenged_dismissed='0'" ;
+                    AND challenges.challenged_dismissed='0' \
+                  ORDER BY start_date DESC" ;
 
     conn.query(done_query, function(err, result){
       if(err){
