@@ -12,8 +12,9 @@ $(document).ready(function(){
   function initializeMap(location) {
     var mapCanvas = document.getElementById('map-canvas');
 
-    var noiseMax = .002;
-    var circleRadius = 400;
+    var noiseMax = .001;
+    //In meters
+    var circleRadius = 200;
 
     var latitude = location.latitude;
     var longitude = location.longitude;
@@ -56,7 +57,8 @@ $(document).ready(function(){
       strokeOpacity: 0.8,
       strokeWeight: 2,
       fillColor: '#cccccc',
-      fillOpacity: 0.5
+      fillOpacity: 0.5,
+      visible:false
     });
 
     //Error handling
@@ -79,7 +81,11 @@ $(document).ready(function(){
     var challUrl = '/challenge/'+challengeId;
 
     $.get(challUrl, function(data){
-      initializeMap(data[0]);
+      if(data.length === 0){
+        alert("Couldn't find challenge.");
+      }else{
+        initializeMap(data[0]);
+      }
     });
   }
 
