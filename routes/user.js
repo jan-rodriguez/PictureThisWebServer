@@ -390,7 +390,7 @@ router.post('/new', function(req, res, next) {
   conn.connect(function(err) {
     if(err) {
       console.error(err.stack);
-      res.json({error: "Failed to connect to database"})
+      res.json({error: "Failed to connect to database"});
       conn.end();
       return;
     }
@@ -408,7 +408,7 @@ router.post('/new', function(req, res, next) {
         }
         return;
       }
-      res.json({user_id: result.insertId});
+      res.json({id: result.insertId});
     });
 
     conn.end();
