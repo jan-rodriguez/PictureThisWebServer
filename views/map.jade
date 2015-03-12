@@ -4,8 +4,12 @@ block css
   link(rel='stylesheet', href='/stylesheets/map.css')
 
 block content
-  #error-msg
   #map-canvas
+  #notification-wrapper
+    #hide-notification x
+    #loading-gif
+    #notification Loading map for challenge
+
 block javascript
   script(src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js")
   script(src="https://maps.googleapis.com/maps/api/js?v=3.exp")

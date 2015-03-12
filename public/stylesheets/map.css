@@ -5,6 +5,67 @@
   background-color: #ccc;
 }
 
-#error-msg {
-  color: red;
+#notification-wrapper{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(240, 240, 240, .8);
+  border: 2px rgba(100, 100, 100, .9) solid;
+  border-radius: 6px;
+  padding: 10px;
+  z-index: 2;
+}
+
+#notification {
+  display: inline-block;
+  font-size: 25px;
+  font-weight: bold;
+  transform: translateY(-50%);
+}
+
+#loading-gif{
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+  background-image: url("/images/loader.gif");
+  background-repeat: round;
+}
+
+#hide-notification {
+  float: right;
+  /*display: inline-block;*/
+  cursor: pointer;
+  visibility: hidden;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+  border: 2px rgb(100, 40, 40) solid;
+  background-color: rgb(195, 67, 67);
+  color: white;
+  text-align: center;
+  font-weight: 900;
+  font-size: 23px;
+  transform: translateY(-100%);
+}
+
+@media only screen
+(max-device-width : 600px) {
+/* Styles */
+
+  #hide-notification {
+    height: 60px;
+    width: 60px;
+  }
+}
+
+.error {
+  color: rgb(195, 67, 67);
+}
+
+.hide {
+  visibility: hidden;
+  opacity: 0;
+  -webkit-transition: opacity .5s, visibility 0s linear .5s; /* Safari */
+  transition: opacity .5s, visibility 0 linear .5s;
 }

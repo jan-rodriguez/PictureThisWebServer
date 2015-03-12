@@ -1,4 +1,54 @@
 $(document).ready(function(){
+
+  //Add click listener to hide notification
+  $("#hide-notification").click(function(){
+    hideNotice();
+  });
+
+  //Boolean to check if notice is being displayed
+  var isDisplayingNotice = true;
+
+  function displayNotice(message, hideNotice, error, canHide){
+
+    //We are displaying a notice
+    isDisplayingNotice = true;
+
+    var noticeWrapper = $("#notification-wrapper");
+    var loadingIcon = $("#loading-gif");
+    var noticeDiv = $("#notification");
+    var hideNotification = $("#hide-notification");
+
+    if(error){
+      noticeWrapper.addClass("error");
+    }else{
+      noticeWrapper.removeClass("error");
+    }
+
+    if(hideNotice){
+      loadingIcon.addClass("hide").css("display", "none");
+    }else{
+      loadingIcon.removeClass("hide").css("display", "inline-block")
+    }
+
+    noticeDiv.text(message);
+
+    noticeDiv.removeClass("hide");
+    noticeWrapper.removeClass("hide");
+
+    //Alloe notification to be hidden
+    if(canHide){
+      hideNotification.css("visibility", "visible");
+    }else{
+      hideNotification.css("visibility", "hidden");
+    }
+  }
+
+  function hideNotice(){
+    //No longer displaying notice
+    isDisplayingNotice = false;
+    $("#notification-wrapper").addClass("hide");
+  }
+
   function getChallengeId() {
     var currentWindowLocation = window.location.href;
 
@@ -64,13 +114,19 @@ $(document).ready(function(){
     //Error handling
     GeoMarker.addListener('geolocation_error', function(error){
       if(error.code === 1){
-        alert("Error getting location. Access denied.")
+        displayNotice("Error getting location: location access denied.", true, true, true);
       }
       else if(error.code === 2){
-        alert("Error getting location. Location unavailable.")
+        displayNotice("Error getting location: location unavailable.", true, true, true);
       }
       else{
-        alert("Error getting location.")
+        displayNotice("Error getting location.", true, true, true);
+      }
+    });
+
+    GeoMarker.addListener('position_changed', function(){
+      if(isDisplayingNotice){
+        hideNotice();
       }
     });
 
@@ -82,8 +138,10 @@ $(document).ready(function(){
 
     $.get(challUrl, function(data){
       if(data.length === 0){
-        alert("Couldn't find challenge.");
+        //Hide the loading icon and show error msg
+        displayNotice("Couldn't find challenge.", true, true);
       }else{
+        displayNotice("Loading your location.", false, false, true)
         initializeMap(data[0]);
       }
     });
