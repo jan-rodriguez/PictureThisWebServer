@@ -380,6 +380,10 @@ router.post('/new', function(req, res, next) {
     return;
   }
 
+  if(username.length > 15 || password.length > 15){
+    res.json({error: "Username and password must be less than 15 characters"});
+  }
+
   //SQL INJECTION SHALL NOT PASS!!!
   var username = mysql.escape(username);
   var password = mysql.escape(password);
