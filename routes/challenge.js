@@ -64,8 +64,8 @@ router.post('/new', function(req, res, next) {
     return;
   }
 
-  if(title.length > 15){
-    res.json({error: "Title cannot be more than 15 characters"});
+  if(title.length > 25){
+    res.json({error: "Title cannot be more than 25 characters"});
     return;
   }
 
